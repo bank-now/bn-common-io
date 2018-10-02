@@ -51,7 +51,7 @@ func (th *TailHandler) HandleMessage(m *nsq.Message) error {
 
 type Rec func(b []byte)
 
-func Setup(c Config) {
+func Subscribe(c Config) {
 	config = c
 	cfg := nsq.NewConfig()
 	nsqdTCPAddrs = append(nsqdTCPAddrs, "192.168.88.24:4150")
