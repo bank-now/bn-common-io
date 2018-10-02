@@ -22,7 +22,7 @@ var (
 	lookupdHTTPAddrs = model.StringArray{}
 	topics           = model.StringArray{}
 
-	rec Rec
+	rec receiveFunction
 
 	config Config
 )
@@ -31,16 +31,16 @@ type Config struct {
 	Name    string
 	Version string
 	Topic   string
-	F       Rec
+	F       receiveFunction
 }
 
-type TailHandler struct {
+type tailHandler struct {
 	topicName     string
 	totalMessages int
 	messagesShown int
 }
 
-func (th *TailHandler) HandleMessage(m *nsq.Message) error {
+func (th *tailHandler) HandleMessage(m *nsq.Message) error {
 	th.messagesShown++
 	rec(m.Body)
 	if th.totalMessages > 0 && th.messagesShown >= th.totalMessages {
@@ -49,7 +49,7 @@ func (th *TailHandler) HandleMessage(m *nsq.Message) error {
 	return nil
 }
 
-type Rec func(b []byte)
+type receiveFunction func(b []byte)
 
 func Subscribe(c Config) {
 	config = c
@@ -85,7 +85,7 @@ func Subscribe(c Config) {
 			log.Fatal(err)
 		}
 
-		consumer.AddHandler(&TailHandler{topicName: topics[i], totalMessages: *totalMessages})
+		consumer.AddHandler(&tailHandler{topicName: topics[i], totalMessages: *totalMessages})
 
 		err = consumer.ConnectToNSQDs(nsqdTCPAddrs)
 		if err != nil {
