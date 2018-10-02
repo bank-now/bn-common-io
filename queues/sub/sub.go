@@ -4,14 +4,11 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bank-now/bn-common-model/common/model"
+	"github.com/nsqio/go-nsq"
 	"log"
-	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
-
-	"github.com/nsqio/go-nsq"
 )
 
 var (
@@ -66,21 +63,6 @@ func Setup(c Config) {
 	if *showVersion {
 		fmt.Printf("%s-%s", config.Name, config.Version)
 		return
-	}
-
-	if *channel == "" {
-		rand.Seed(time.Now().UnixNano())
-		*channel = fmt.Sprintf("tail%06d#ephemeral", rand.Int()%999999)
-	}
-
-	if len(nsqdTCPAddrs) == 0 && len(lookupdHTTPAddrs) == 0 {
-		log.Fatal("--nsqd-tcp-address or --lookupd-http-address required")
-	}
-	if len(nsqdTCPAddrs) > 0 && len(lookupdHTTPAddrs) > 0 {
-		log.Fatal("use --nsqd-tcp-address or --lookupd-http-address not both")
-	}
-	if len(topics) == 0 {
-		log.Fatal("--topic required")
 	}
 
 	sigChan := make(chan os.Signal, 1)
