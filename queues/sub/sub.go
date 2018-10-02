@@ -22,8 +22,6 @@ var (
 	lookupdHTTPAddrs = model.StringArray{}
 	topics           = model.StringArray{}
 
-	rec ReceiveFunction
-
 	config Config
 )
 
@@ -42,7 +40,7 @@ type tailHandler struct {
 
 func (th *tailHandler) HandleMessage(m *nsq.Message) error {
 	th.messagesShown++
-	rec(m.Body)
+	config.F(m.Body)
 	if th.totalMessages > 0 && th.messagesShown >= th.totalMessages {
 		os.Exit(0)
 	}
