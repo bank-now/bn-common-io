@@ -1,4 +1,4 @@
-package io
+package sub
 
 import (
 	"flag"
@@ -20,7 +20,6 @@ var (
 	channel       = flag.String("channel", "default", "NSQ channel")
 	maxInFlight   = flag.Int("max-in-flight", 200, "max number of messages to allow in flight")
 	totalMessages = flag.Int("n", 0, "total messages to show (will wait if starved)")
-	printTopic    = flag.Bool("print-topic", false, "print topic name where message was received")
 
 	nsqdTCPAddrs     = model.StringArray{}
 	lookupdHTTPAddrs = model.StringArray{}
