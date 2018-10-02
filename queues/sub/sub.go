@@ -22,7 +22,7 @@ var (
 	lookupdHTTPAddrs = model.StringArray{}
 	topics           = model.StringArray{}
 
-	rec receiveFunction
+	rec ReceiveFunction
 
 	config Config
 )
@@ -31,7 +31,7 @@ type Config struct {
 	Name    string
 	Version string
 	Topic   string
-	F       receiveFunction
+	F       ReceiveFunction
 }
 
 type tailHandler struct {
@@ -49,7 +49,7 @@ func (th *tailHandler) HandleMessage(m *nsq.Message) error {
 	return nil
 }
 
-type receiveFunction func(b []byte)
+type ReceiveFunction func(b []byte)
 
 func Subscribe(c Config) {
 	config = c
