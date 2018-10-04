@@ -28,6 +28,7 @@ var (
 type Config struct {
 	Name    string
 	Version string
+	Address string
 	Topic   string
 	F       ReceiveFunction
 }
@@ -52,7 +53,7 @@ type ReceiveFunction func(b []byte)
 func Subscribe(c Config) {
 	config = c
 	cfg := nsq.NewConfig()
-	nsqdTCPAddrs = append(nsqdTCPAddrs, "192.168.88.24:4150")
+	nsqdTCPAddrs = append(nsqdTCPAddrs, c.Address)
 	topics = append(topics, c.Topic)
 
 	flag.Var(&nsq.ConfigFlag{cfg}, "consumer-opt", "http://godoc.org/github.com/nsqio/go-nsq#Config")
