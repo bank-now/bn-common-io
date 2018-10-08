@@ -1,4 +1,4 @@
-package main
+package zipkin
 
 import (
 	"encoding/json"
@@ -84,7 +84,7 @@ func main() {
 
 	var spans []Span
 
-	parent := NewSpan("100.test.com", "createPenguin")
+	parent := NewSpan("101.test.com", "createPenguin")
 	parent.Duration = 100000
 	spans = append(spans, parent)
 	time.Sleep(100 * time.Millisecond)
