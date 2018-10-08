@@ -80,12 +80,12 @@ func Send(url string, s []Span) (body []byte, err error) {
 	return
 }
 
-func LogParent(serviceName string, methodName string, d int64) Ghost {
+func LogParent(url, serviceName, methodName string, d int64) Ghost {
 	var spans []Span
 	s := NewSpan(serviceName, methodName)
 	s.Duration = d
 	spans = append(spans, s)
-	_, err := Send("http://192.168.88.24:9411/api/v2/spans", spans)
+	_, err := Send(url, spans)
 	if err != nil {
 		fmt.Println(err)
 	}
