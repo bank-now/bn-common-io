@@ -1,63 +1,90 @@
-package zipkin
+package main
 
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
+	"github.com/bank-now/bn-common-io/rest"
+	"github.com/bank-now/bn-common-io/util"
+	"github.com/golang-plus/uuid"
+
 	"time"
 )
 
+const (
+	LenID = 16
+)
+
 type Span struct {
-	TraceId     string              `json:"traceId"`
-	Name        string              `json:"name"`
-	ParentId    string              `json:"parentId"`
-	ID          string              `json:"id"`
-	Kind        string              `json:"kind"`
-	Timestamp   int                 `json:"timestamp"`
-	Duration    int                 `json:"duration"`
-	Debug       bool                `json:"debug"`
-	Shared      bool                `json:"shared"`
-	Annotations []map[string]string `json:"annotations"`
-	Tags        map[string]string   `json:"tags"`
+	TraceId       string        `json:"traceId"`
+	ParentId      string        `json:"parentId,omitempty"`
+	ID            string        `json:"id"`
+	Name          string        `json:"name"`
+	Timestamp     int64         `json:"timestamp"`
+	Duration      int64         `json:"duration,omitempty"`
+	LocalEndpoint LocalEndpoint `json:"localEndpoint"`
 }
 
-type TinySpan struct {
-	Name     string
-	TraceId  string
-	Duration int
+type LocalEndpoint struct {
+	ServiceName string `json:"serviceName"`
 }
 
-func NewSpan(t TinySpan) *Span {
-	s := Span{
-		TraceId:   t.TraceId,
-		Name:      t.Name,
-		Timestamp: time.Now().Second(),
-		Debug:     true,
-		Shared:    true,
-		Duration:  t.Duration,
-		Kind:      "CLIENT",
-	}
+func NewSpan(serviceName, methodName string) Span {
 	u, _ := uuid.NewRandom()
-	s.ID = u.String()
+	id := util.RandomHexString(LenID)
+	s := Span{
+		ID:        id,
+		TraceId:   u.Format(uuid.StyleWithoutDash),
+		Name:      methodName,
+		Timestamp: time.Now().UnixNano() / int64(1000),
+		LocalEndpoint: LocalEndpoint{
+			ServiceName: serviceName,
+		},
+	}
+	return s
+}
+func NewChildSpan(parent Span, methodName string) Span {
+	s := Span{
+		ID:        util.RandomHexString(LenID),
+		ParentId:  parent.ID,
+		TraceId:   parent.TraceId,
+		Name:      methodName,
+		Timestamp: time.Now().UnixNano() / int64(1000),
+		LocalEndpoint: LocalEndpoint{
+			ServiceName: parent.LocalEndpoint.ServiceName,
+		},
+	}
+	return s
+}
 
-	s.Annotations = append(s.Annotations, make(map[string]string))
-	//s.Annotations[0]["Key here"] = "value"
-
-	s.Tags = make(map[string]string)
-	//s.Tags["tag here"] = "value here"
-
-	return &s
-
+func Send(url string, s []Span) (body []byte, err error) {
+	b, err := json.Marshal(s)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(string(b))
+	body, err = rest.Post(url, b)
+	return
 }
 
 func main() {
-	t := TinySpan{
-		TraceId:  "100",
-		Duration: 1000,
-		Name:     "Service me"}
-	s := NewSpan(t)
 
-	b, _ := json.Marshal(s)
-	fmt.Println(string(b))
+	var spans []Span
+
+	parent := NewSpan("100.test.com", "createPenguin")
+	parent.Duration = 100000
+	spans = append(spans, parent)
+	time.Sleep(100 * time.Millisecond)
+
+	child := NewChildSpan(parent, "washPenguin")
+	child.Duration = 200000
+	spans = append(spans, child)
+
+	body, err := Send("http://192.168.88.24:9411/api/v2/spans", spans)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(string(body))
+	}
 
 }
