@@ -24,6 +24,19 @@ type Span struct {
 	LocalEndpoint LocalEndpoint `json:"localEndpoint"`
 }
 
+type Ghost struct {
+	TraceId     string `json:"traceId"`
+	ID          string `json:"ID,omitempty"`
+	ServiceName string `json:"serviceName"`
+}
+
+func (parent *Span) ToGhost() Ghost {
+	return Ghost{
+		ID:          parent.ID,
+		TraceId:     parent.TraceId,
+		ServiceName: parent.LocalEndpoint.ServiceName}
+}
+
 type LocalEndpoint struct {
 	ServiceName string `json:"serviceName"`
 }
@@ -42,7 +55,7 @@ func NewSpan(serviceName, methodName string) Span {
 	}
 	return s
 }
-func NewChildSpan(parent Span, methodName string) Span {
+func NewChildSpan(parent Ghost, methodName string) Span {
 	s := Span{
 		ID:        util.RandomHexString(LenID),
 		ParentId:  parent.ID,
@@ -50,7 +63,7 @@ func NewChildSpan(parent Span, methodName string) Span {
 		Name:      methodName,
 		Timestamp: time.Now().UnixNano() / int64(1000),
 		LocalEndpoint: LocalEndpoint{
-			ServiceName: parent.LocalEndpoint.ServiceName,
+			ServiceName: parent.ServiceName,
 		},
 	}
 	return s
@@ -76,7 +89,7 @@ func main() {
 	spans = append(spans, parent)
 	time.Sleep(100 * time.Millisecond)
 
-	child := NewChildSpan(parent, "washPenguin")
+	child := NewChildSpan(parent.ToGhost(), "washPenguin")
 	child.Duration = 200000
 	spans = append(spans, child)
 
