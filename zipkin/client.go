@@ -93,6 +93,19 @@ func LogParent(url, serviceName, methodName string, d int64) Ghost {
 
 }
 
+func LogChild(parent Ghost, url, methodName string, d int64) Ghost {
+	var spans []Span
+	s := NewChildSpan(parent, methodName)
+	s.Duration = d
+	spans = append(spans, s)
+	_, err := Send(url, spans)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return s.ToGhost()
+
+}
+
 func main() {
 
 	var spans []Span
