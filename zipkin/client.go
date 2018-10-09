@@ -80,9 +80,9 @@ func Send(url string, s []Span) (body []byte, err error) {
 	return
 }
 
-func LogParentFromSpan(url string, s Span, d int64) Ghost {
+func LogParentFromSpan(url string, s Span, d time.Duration) Ghost {
 	var spans []Span
-	s.Duration = d
+	s.Duration = d.Nanoseconds() / 1000
 	spans = append(spans, s)
 	_, err := Send(url, spans)
 	if err != nil {
@@ -91,15 +91,15 @@ func LogParentFromSpan(url string, s Span, d int64) Ghost {
 	return s.ToGhost()
 }
 
-func LogParent(url, serviceName, methodName string, d int64) Ghost {
+func LogParent(url, serviceName, methodName string, d time.Duration) Ghost {
 	s := NewSpan(serviceName, methodName)
 	return LogParentFromSpan(url, s, d)
 }
 
-func LogChild(parent Ghost, url, methodName string, d int64) Ghost {
+func LogChild(parent Ghost, url, methodName string, d time.Duration) Ghost {
 	var spans []Span
 	s := NewChildSpan(parent, methodName)
-	s.Duration = d
+	s.Duration = d.Nanoseconds() / 1000
 	spans = append(spans, s)
 	_, err := Send(url, spans)
 	if err != nil {
