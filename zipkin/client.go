@@ -75,7 +75,6 @@ func Send(url string, s []Span) (body []byte, err error) {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(string(b))
 	body, err = rest.Post(url, b)
 	return
 }
