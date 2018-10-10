@@ -21,8 +21,6 @@ var (
 	nsqdTCPAddrs     = model.StringArray{}
 	lookupdHTTPAddrs = model.StringArray{}
 	topics           = model.StringArray{}
-
-	config Config
 )
 
 type Config struct {
@@ -37,11 +35,12 @@ type tailHandler struct {
 	topicName     string
 	totalMessages int
 	messagesShown int
+	config        Config
 }
 
 func (th *tailHandler) HandleMessage(m *nsq.Message) error {
 	th.messagesShown++
-	config.F(m.Body)
+	th.config.F(m.Body)
 	if th.totalMessages > 0 && th.messagesShown >= th.totalMessages {
 		os.Exit(0)
 	}
@@ -51,7 +50,6 @@ func (th *tailHandler) HandleMessage(m *nsq.Message) error {
 type ReceiveFunction func(b []byte)
 
 func Subscribe(c Config) {
-	config = c
 	cfg := nsq.NewConfig()
 	nsqdTCPAddrs = append(nsqdTCPAddrs, c.Address)
 	topics = append(topics, c.Topic)
@@ -60,7 +58,7 @@ func Subscribe(c Config) {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Printf("%s-%s", config.Name, config.Version)
+		fmt.Printf("%s-%s", c.Name, c.Version)
 		return
 	}
 
@@ -72,7 +70,7 @@ func Subscribe(c Config) {
 		*maxInFlight = *totalMessages
 	}
 
-	cfg.UserAgent = fmt.Sprintf("%s-%s", config.Name, config.Version)
+	cfg.UserAgent = fmt.Sprintf("%s-%s", c.Name, c.Version)
 	cfg.MaxInFlight = *maxInFlight
 
 	consumers := []*nsq.Consumer{}
@@ -84,7 +82,7 @@ func Subscribe(c Config) {
 			log.Fatal(err)
 		}
 
-		consumer.AddHandler(&tailHandler{topicName: topics[i], totalMessages: *totalMessages})
+		consumer.AddHandler(&tailHandler{topicName: topics[i], totalMessages: *totalMessages, config: c})
 
 		err = consumer.ConnectToNSQDs(nsqdTCPAddrs)
 		if err != nil {
