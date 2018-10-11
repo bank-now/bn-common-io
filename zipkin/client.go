@@ -107,25 +107,3 @@ func LogChild(parent Ghost, url, methodName string, d time.Duration) Ghost {
 	return s.ToGhost()
 
 }
-
-func main() {
-
-	var spans []Span
-
-	parent := NewSpan("101.test.com", "createPenguin")
-	parent.Duration = 100000
-	spans = append(spans, parent)
-	time.Sleep(100 * time.Millisecond)
-
-	child := NewChildSpan(parent.ToGhost(), "washPenguin")
-	child.Duration = 200000
-	spans = append(spans, child)
-
-	body, err := SendSpan("http://192.168.88.24:9411/api/v2/spans", spans)
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Println(string(body))
-	}
-
-}
