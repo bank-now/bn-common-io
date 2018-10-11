@@ -69,7 +69,7 @@ func NewChildSpan(parent Ghost, methodName string) Span {
 	return s
 }
 
-func Send(url string, s []Span) (body []byte, err error) {
+func SendSpan(url string, s []Span) (body []byte, err error) {
 	b, err := json.Marshal(s)
 	if err != nil {
 		fmt.Println(err)
@@ -83,7 +83,7 @@ func LogParentFromSpan(url string, s Span, d time.Duration) Ghost {
 	var spans []Span
 	s.Duration = d.Nanoseconds() / 1000
 	spans = append(spans, s)
-	_, err := Send(url, spans)
+	_, err := SendSpan(url, spans)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -100,7 +100,7 @@ func LogChild(parent Ghost, url, methodName string, d time.Duration) Ghost {
 	s := NewChildSpan(parent, methodName)
 	s.Duration = d.Nanoseconds() / 1000
 	spans = append(spans, s)
-	_, err := Send(url, spans)
+	_, err := SendSpan(url, spans)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -121,7 +121,7 @@ func main() {
 	child.Duration = 200000
 	spans = append(spans, child)
 
-	body, err := Send("http://192.168.88.24:9411/api/v2/spans", spans)
+	body, err := SendSpan("http://192.168.88.24:9411/api/v2/spans", spans)
 	if err != nil {
 		fmt.Println(err)
 	} else {
