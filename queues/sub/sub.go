@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bank-now/bn-common-model/common/model"
-	"github.com/gocql/gocql"
 	"github.com/nsqio/go-nsq"
 	"log"
 	"os"
@@ -29,7 +28,6 @@ type Config struct {
 	Version string
 	Address string
 	Topic   string
-	Session *gocql.Session
 	F       ReceiveFunction
 }
 

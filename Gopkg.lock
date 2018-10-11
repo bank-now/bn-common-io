@@ -3,17 +3,35 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:d1e4ea008b39b1ad57210f71c5ac0887408b4044ba753850ff5cc17ff60192e0"
   name = "github.com/bank-now/bn-common-model"
   packages = ["common/model"]
+  pruneopts = "UT"
   revision = "df6e7ad1444f4cc5f3e225934499a62e50e2e484"
 
 [[projects]]
+  branch = "master"
+  digest = "1:7a8e0f3e6962bfd8dc3b2f0395960cd36f32eb94ec7220cf7f6a2cd18bf02e59"
+  name = "github.com/gocql/gocql"
+  packages = [
+    ".",
+    "internal/lru",
+    "internal/murmur",
+    "internal/streams",
+  ]
+  pruneopts = "UT"
+  revision = "26b68fd731048f2db526e5e6147a69330cb241bc"
+
+[[projects]]
+  digest = "1:94d8c9e3a4954505ca89243e2121180972eecf8e3d160f3b34a48825ddd95cc1"
   name = "github.com/golang-plus/errors"
   packages = ["."]
+  pruneopts = "UT"
   revision = "a61c34ead85085f3e1b87b8c04e49bbf60c99fb1"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:224bf08a201edf15ec9f086549321257d5a2ee0d23dc649e7e6ad90ce5502439"
   name = "github.com/golang-plus/uuid"
   packages = [
     ".",
@@ -23,26 +41,52 @@
     "internal/namebased/md5",
     "internal/namebased/sha1",
     "internal/random",
-    "internal/timebased"
+    "internal/timebased",
   ]
+  pruneopts = "UT"
   revision = "a0510c37ef1f49c8290c3a9911d0f7f9ed24d335"
   version = "v1.0.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:4a0c6bb4805508a6287675fac876be2ac1182539ca8a32468d8128882e9d5009"
   name = "github.com/golang/snappy"
   packages = ["."]
+  pruneopts = "UT"
   revision = "2e65f85255dbc3072edf28d6b5b8efc472979f5a"
 
 [[projects]]
+  branch = "master"
+  digest = "1:364b908b9b27b97ab838f2f6f1b1f46281fa29b978a037d72a9b1d4f6d940190"
+  name = "github.com/hailocab/go-hostpool"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e80d13ce29ede4452c43dea11e79b9bc8a15b478"
+
+[[projects]]
+  digest = "1:bb48459ec76efe45f13094480296462ef5c9aaa56662918819b7a8fce3155b8b"
   name = "github.com/nsqio/go-nsq"
   packages = ["."]
+  pruneopts = "UT"
   revision = "eee57a3ac4174c55924125bb15eeeda8cffb6e6f"
   version = "v1.0.7"
+
+[[projects]]
+  digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
+  name = "gopkg.in/inf.v0"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "d2d2541c53f18d2a059457998ce2876cc8e67cbf"
+  version = "v0.9.1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "386d21ddcb78b4effa3061d778eddd7d08b90746d3b54caf30850e60158cdea6"
+  input-imports = [
+    "github.com/bank-now/bn-common-model/common/model",
+    "github.com/gocql/gocql",
+    "github.com/golang-plus/uuid",
+    "github.com/nsqio/go-nsq",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
