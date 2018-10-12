@@ -3,9 +3,10 @@ package zipkin
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/bank-now/bn-common-io/rest"
+	"github.com/bank-now/bn-common-io/queues/pub"
 	"github.com/bank-now/bn-common-io/util"
 	"github.com/golang-plus/uuid"
+	"github.com/nsqio/go-nsq"
 
 	"time"
 )
@@ -55,7 +56,7 @@ func NewSpan(serviceName, methodName string) Span {
 	}
 	return s
 }
-func NewChildSpan(parent Ghost, methodName string) Span {
+func NewChildSpan(parent Ghost, serviceName string, methodName string) Span {
 	s := Span{
 		ID:        util.RandomHexString(LenID),
 		ParentId:  parent.ID,
@@ -63,44 +64,47 @@ func NewChildSpan(parent Ghost, methodName string) Span {
 		Name:      methodName,
 		Timestamp: time.Now().UnixNano() / int64(1000),
 		LocalEndpoint: LocalEndpoint{
-			ServiceName: parent.ServiceName,
+			ServiceName: serviceName,
 		},
 	}
 	return s
 }
 
-func SendSpan(url string, s []Span) (body []byte, err error) {
+func EnqueueSpan(producer *nsq.Producer, config pub.Config, s []Span) (body []byte, err error) {
+
 	b, err := json.Marshal(s)
+	err = producer.Publish(config.Topic, b)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	body, err = rest.Post(url, b)
+	//body, err = rest.Post(url, b)
 	return
 }
 
-func LogParentFromSpan(url string, s Span, d time.Duration) Ghost {
+func LogParentSpan(producer *nsq.Producer, config pub.Config, s Span, d time.Duration) (ghost Ghost, err error) {
 	var spans []Span
 	s.Duration = d.Nanoseconds() / 1000
 	spans = append(spans, s)
-	_, err := SendSpan(url, spans)
+	_, err = EnqueueSpan(producer, config, spans)
 	if err != nil {
-		fmt.Println(err)
+		return
 	}
-	return s.ToGhost()
+	ghost = s.ToGhost()
+	return
 }
 
-func LogParent(url, serviceName, methodName string, d time.Duration) Ghost {
+func LogParent(producer *nsq.Producer, config pub.Config, serviceName, methodName string, d time.Duration) (ghost Ghost, err error) {
 	s := NewSpan(serviceName, methodName)
-	return LogParentFromSpan(url, s, d)
+	return LogParentSpan(producer, config, s, d)
 }
 
-func LogChild(parent Ghost, url, methodName string, d time.Duration) Ghost {
+func LogChild(producer *nsq.Producer, config pub.Config, parent Ghost, serviceName string, methodName string, d time.Duration) Ghost {
 	var spans []Span
-	s := NewChildSpan(parent, methodName)
+	s := NewChildSpan(parent, serviceName, methodName)
 	s.Duration = d.Nanoseconds() / 1000
 	spans = append(spans, s)
-	_, err := SendSpan(url, spans)
+	_, err := EnqueueSpan(producer, config, spans)
 	if err != nil {
 		fmt.Println(err)
 	}
